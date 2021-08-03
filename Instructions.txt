@@ -1,0 +1,38 @@
+NOTE: 
+
+FILE NAME LINES START WITH A -
+COMMAND LINES START WITH A >
+
+-------------------------------------------------------------------
+1. Download the following files from the Google Drive onto the Raspberry Pi:
+
+-mcp2515-can2-overlay.dts
+-mcp2515-can3-overlay.dts
+
+-------------------------------------------------------------------
+2. Then run each of the following commands in Terminal:
+
+>dtc -@ -I dts -O dtb -o mcp2515-can2.dtbo mcp2515-can2-overlay.dts
+
+>dtc -@ -I dts -O dtb -o mcp2515-can3.dtbo mcp2515-can3-overlay.dts
+
+>sudo cp mcp2515-can2.dtbo /boot/overlays
+
+>sudo cp mcp2515-can3.dtbo /boot/overlays
+-------------------------------------------------------------------
+3. Modify the config file by opening /boot/config.txt with a text editor (I use nano because it's simple)
+
+	Add the following lines to the bottom/end of the file:
+
+dtparam=spi=on
+dtoverlay=spi1-2cs,cs1_spidev=off
+dtoverlay=mcp2515-can2,oscillator=16000000,interrupt=25
+dtoverlay=mcp2515-can3,oscillator=16000000,interrupt=24
+dtoverlay=spi-bcm2835-overlay
+-------------------------------------------------------------------
+4. Reboot the Raspberry Pi and test to see if it worked by running the following commands in Terminal:
+
+>sudo /sbin/ip link set can0 up type can bitrate 250000  
+>sudo /sbin/ip link set can1 up type can bitrate 250000
+
+	The expected result is that the commands issue and complete with no response.
